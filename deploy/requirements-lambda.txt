@@ -1,0 +1,6 @@
+# Dependencias empacotadas dentro da funcao Lambda (boto3 ja vem no runtime).
+Flask>=3.0
+pandas>=2.2
+openpyxl>=3.1
+reportlab>=4.0
+apig-wsgi>=2.18

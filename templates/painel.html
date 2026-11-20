@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Painel{% endblock %}
+{% block conteudo %}
+<div class="cabecalho-pagina">
+  <h1>Painel de calibrações</h1>
+  <a class="botao" href="{{ url_for('novo') }}">Nova análise</a>
+</div>
+
+<section class="indicadores" aria-label="Indicadores">
+  <div class="indicador"><span class="indicador__valor">{{ ind.total }}</span><span class="indicador__rotulo">Processamentos</span></div>
+  <div class="indicador indicador--ok"><span class="indicador__valor">{{ ind.aprovados }}</span><span class="indicador__rotulo">Aprovados</span></div>
+  <div class="indicador indicador--falha"><span class="indicador__valor">{{ ind.reprovados }}</span><span class="indicador__rotulo">Reprovados</span></div>
+  <div class="indicador"><span class="indicador__valor">{% if ind.taxa_aprovacao is none %}—{% else %}{{ ind.taxa_aprovacao | string | replace('.', ',') }}%{% endif %}</span><span class="indicador__rotulo">Taxa de aprovação</span></div>
+</section>
+
+<section class="cartao">
+  <h2>Histórico recente <span class="ajuda ajuda--inline">(até {{ limite }} mais recentes)</span></h2>
+  {% if resumos %}
+  <div class="tabela-rolagem">
+  <table class="tabela">
+    <thead><tr><th>Data</th><th>Instrumento</th><th>Cliente solicitante</th><th>Arquivo</th><th class="n">Pontos fora</th><th>Parecer</th><th></th></tr></thead>
+    <tbody>
+    {% for r in resumos %}
+      <tr class="{{ 'linha-fora' if r.parecer != 'APROVADO' else '' }}">
+        <td>{{ r.criado_em | data_br }}</td>
+        <td>{{ r.codigo or '—' }}{% if r.denominacao %} · {{ r.denominacao }}{% endif %}</td>
+        <td>{{ r.cliente or '—' }}</td>
+        <td>{{ r.arquivo }}</td>
+        <td class="n">{{ r.fora }} de {{ r.total }}</td>
+        <td><span class="selo {{ 'selo--ok' if r.parecer == 'APROVADO' else 'selo--falha' }}">{{ '✓' if r.parecer == 'APROVADO' else '✗' }} {{ r.parecer }}</span></td>
+        <td><a href="{{ url_for('detalhe', rid=r.id) }}">Abrir</a></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% else %}
+  <p class="vazio">Nenhum processamento ainda. Envie uma planilha em <a href="{{ url_for('novo') }}">Nova análise</a>.</p>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,48 @@
+============================= test session starts ==============================
+platform linux -- Python 3.13.16, pytest-9.1.1, pluggy-1.6.0 -- /usr/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/claude/schulz-certificados-mvp
+plugins: anyio-4.15.1
+collecting ... collected 39 items
+
+tests/test_app.py::test_pagina_inicial_tem_formulario_de_upload PASSED   [  2%]
+tests/test_app.py::test_fluxo_completo_aprovado PASSED                   [  5%]
+tests/test_app.py::test_fluxo_completo_reprovado_lista_ponto_fora PASSED [  7%]
+tests/test_app.py::test_pdf_do_processamento PASSED                      [ 10%]
+tests/test_app.py::test_pdf_inexistente_retorna_404 PASSED               [ 12%]
+tests/test_app.py::test_extensao_invalida_retorna_400 PASSED             [ 15%]
+tests/test_app.py::test_sem_arquivo_retorna_400 PASSED                   [ 17%]
+tests/test_app.py::test_planilha_em_branco_retorna_422_com_mensagem PASSED [ 20%]
+tests/test_app.py::test_arquivo_corrompido_retorna_422 PASSED            [ 23%]
+tests/test_app.py::test_api_json PASSED                                  [ 25%]
+tests/test_app.py::test_api_erro_em_json PASSED                          [ 28%]
+tests/test_app.py::test_html_escapa_conteudo_da_planilha PASSED          [ 30%]
+tests/test_calculos.py::test_media_das_leituras PASSED                   [ 33%]
+tests/test_calculos.py::test_erro_sistematico_e_media_menos_padrao PASSED [ 35%]
+tests/test_calculos.py::test_ponto_dentro_e_fora_da_tolerancia PASSED    [ 38%]
+tests/test_calculos.py::test_parecer_aprovado_quando_todos_dentro PASSED [ 41%]
+tests/test_calculos.py::test_parecer_reprovado_se_um_ponto_fora PASSED   [ 43%]
+tests/test_calculos.py::test_limite_exato_nao_reprova_por_ponto_flutuante PASSED [ 46%]
+tests/test_calculos.py::test_sem_a_margem_o_mesmo_caso_seria_reprovado PASSED [ 48%]
+tests/test_calculos.py::test_pouco_acima_do_limite_reprova PASSED        [ 51%]
+tests/test_calculos.py::test_tolerancia_assimetrica_usa_lado_correto PASSED [ 53%]
+tests/test_calculos.py::test_erro_negativo_infimo_por_float_nao_reprova PASSED [ 56%]
+tests/test_calculos.py::test_limites_min_max_batem_com_a_aula PASSED     [ 58%]
+tests/test_calculos.py::test_desvio_padrao_amostral PASSED               [ 61%]
+tests/test_calculos.py::test_sem_pontos_levanta_erro PASSED              [ 64%]
+tests/test_calculos.py::test_resultado_e_serializavel_em_json PASSED     [ 66%]
+tests/test_leitura.py::test_arquivo_strict_quebra_o_leitor_padrao_mas_nao_o_nosso PASSED [ 69%]
+tests/test_leitura.py::test_arquivo_padrao_passa_inalterado PASSED       [ 71%]
+tests/test_leitura.py::test_le_pontos_e_metadados_do_arquivo_strict PASSED [ 74%]
+tests/test_leitura.py::test_cabecalho_dinamico_em_layout_deslocado PASSED [ 76%]
+tests/test_leitura.py::test_ignora_colunas_auxiliares_tol_repetidas PASSED [ 79%]
+tests/test_leitura.py::test_descarta_residuos_e_linhas_vazias_com_erro_de_formula PASSED [ 82%]
+tests/test_leitura.py::test_aceita_virgula_decimal_em_texto PASSED       [ 84%]
+tests/test_leitura.py::test_media_da_planilha_e_capturada_para_conferencia PASSED [ 87%]
+tests/test_leitura.py::test_modelo_em_branco_gera_mensagem_clara PASSED  [ 89%]
+tests/test_leitura.py::test_arquivo_que_nao_e_xlsx PASSED                [ 92%]
+tests/test_leitura.py::test_planilha_sem_tabela_de_resultados PASSED     [ 94%]
+tests/test_planilha_real.py::test_planilha_real_le_14_pontos_e_media_confere_com_o_excel SKIPPED [ 97%]
+tests/test_planilha_real.py::test_planilha_real_parecer_conforme_regras_do_roteiro SKIPPED [100%]
+
+======================== 37 passed, 2 skipped in 1.03s =========================

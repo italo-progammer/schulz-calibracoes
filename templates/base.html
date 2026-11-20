@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block titulo %}Plataforma{% endblock %} · Calibrações Schulz</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <header class="topo">
+    <div class="topo__inner">
+      <a class="marca" href="{{ url_for('painel') }}">Calibrações · Schulz</a>
+      <nav class="nav" aria-label="Principal">
+        {% if not auth_ativa or session.get('auth') %}
+        <a href="{{ url_for('painel') }}" {% if request.endpoint == 'painel' %}aria-current="page"{% endif %}>Painel</a>
+        <a href="{{ url_for('novo') }}" {% if request.endpoint == 'novo' %}aria-current="page"{% endif %}>Nova análise</a>
+        {% if auth_ativa %}
+        <form action="{{ url_for('logout') }}" method="post" class="nav__sair"><button type="submit">Sair</button></form>
+        {% endif %}
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+  <main class="conteudo">
+    {% block conteudo %}{% endblock %}
+  </main>
+  <footer class="rodape">Projeto Aplicado III · UniSENAI · MVP acadêmico — não substitui o certificado oficial</footer>
+</body>
+</html>

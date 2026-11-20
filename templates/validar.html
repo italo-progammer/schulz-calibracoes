@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Validação{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao--estreito">
+  <h1>Validação de autenticidade</h1>
+  {% if reg %}
+  <div class="parecer {{ 'parecer--ok' if aprovado else 'parecer--falha' }}" role="status">
+    <span class="parecer__rotulo">Parecer registrado</span>
+    <span class="parecer__valor">{{ reg.parecer }}</span>
+    <span class="parecer__detalhe">{{ reg.dentro }} de {{ reg.total }} pontos dentro da tolerância</span>
+  </div>
+  <dl class="meta">
+    <div><dt>Código do instrumento</dt><dd>{{ reg.codigo or '—' }}</dd></div>
+    <div><dt>Denominação</dt><dd>{{ reg.denominacao or '—' }}</dd></div>
+    <div><dt>Processado em</dt><dd>{{ reg.criado_em | data_br }}</dd></div>
+    <div><dt>Registro</dt><dd>{{ reg.id }}</dd></div>
+  </dl>
+  <p class="ajuda">Este registro existe na plataforma da Schulz e confere com o documento apresentado.
+    Documento de apoio do MVP acadêmico; não substitui o certificado de calibração oficial.</p>
+  {% else %}
+  <div class="alerta alerta--erro" role="alert">Registro não encontrado ou código de validação inválido.
+    Não é possível confirmar a autenticidade deste documento.</div>
+  {% endif %}
+</section>
+{% endblock %}

@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+{% block titulo %}Resultado{% endblock %}
+{% block conteudo %}
+<section class="cartao">
+  <div class="parecer {{ 'parecer--ok' if aprovado else 'parecer--falha' }}" role="status">
+    <span class="parecer__rotulo">Parecer final</span>
+    <span class="parecer__valor">{{ reg.parecer }}</span>
+    <span class="parecer__detalhe">
+      {{ reg.dentro }} de {{ reg.total }} pontos dentro da tolerância
+      {%- if not aprovado %} · fora: {{ reg.parametros_fora | join(', ') }}{% endif %}
+    </span>
+  </div>
+
+  <div class="acoes">
+    <a class="botao" href="{{ url_for('pdf', rid=reg.id) }}">Baixar relatório em PDF</a>
+    <a class="botao botao--sec" href="{{ url_for('novo') }}">Nova análise</a>
+    <a class="botao botao--sec" href="{{ url_validacao(reg.id) }}">Página de validação (QR)</a>
+    <a class="botao botao--sec" href="{{ url_for('painel') }}">Voltar ao painel</a>
+  </div>
+</section>
+
+<section class="cartao">
+  <h2>Identificação</h2>
+  <dl class="meta">
+    <div><dt>Cliente solicitante</dt><dd>{{ reg.metadados.cliente or '—' }}</dd></div>
+    <div><dt>Técnico executante</dt><dd>{{ reg.metadados.tecnico or '—' }}</dd></div>
+    <div><dt>Código</dt><dd>{{ reg.metadados.codigo or '—' }}</dd></div>
+    <div><dt>Denominação</dt><dd>{{ reg.metadados.denominacao or '—' }}</dd></div>
+    <div><dt>Fabricante</dt><dd>{{ reg.metadados.fabricante or '—' }}</dd></div>
+    <div><dt>Data</dt><dd>{{ reg.metadados.data or '—' }}</dd></div>
+    <div><dt>Temperatura</dt><dd>{{ reg.metadados.temperatura or '—' }}</dd></div>
+    <div><dt>Arquivo enviado</dt><dd>{{ reg.arquivo }}</dd></div>
+    <div><dt>Processado em</dt><dd>{{ reg.criado_em | data_br }}</dd></div>
+    <div><dt>Origem dos dados</dt><dd>Aba “{{ reg.aba }}”, cabeçalho na linha {{ reg.linha_cabecalho }}</dd></div>
+  </dl>
+</section>
+
+<section class="cartao">
+  <h2>Resultados por ponto de ensaio (mm)</h2>
+  <div class="tabela-rolagem">
+  <table class="tabela">
+    <thead>
+      <tr>
+        <th>Parâmetro</th><th class="n">Nominal</th><th class="n">Tol. +</th>
+        <th class="n">Tol. −</th><th class="n">Leituras</th><th class="n">Média</th>
+        <th class="n">Erro sistemático</th><th class="n">LEA</th><th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for p in reg.pontos %}
+      <tr class="{{ 'linha-fora' if not p.dentro else '' }}">
+        <td>{{ p.parametro }}</td>
+        <td class="n">{{ p.nominal | num(3) }}</td>
+        <td class="n">{{ p.tol_mais | num(3) }}</td>
+        <td class="n">{{ p.tol_menos | num(3) }}</td>
+        <td class="n">{{ p.n_leituras }}</td>
+        <td class="n">{{ p.media | num(4) }}</td>
+        <td class="n">{{ p.erro_sistematico | num(4) }}</td>
+        <td class="n">{{ p.lea | num(3) }}</td>
+        <td><span class="selo {{ 'selo--ok' if p.dentro else 'selo--falha' }}">
+          {{ '✓' if p.dentro else '✗' }} {{ p.status }}</span></td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  {% if reg.descartadas %}
+  <details class="detalhes">
+    <summary>{{ reg.descartadas | length }} linha(s) ignorada(s) na leitura</summary>
+    <ul>
+      {% for d in reg.descartadas %}
+      <li>Linha {{ d.linha }} ({{ d.parametro }}): {{ d.motivo }}</li>
+      {% endfor %}
+    </ul>
+  </details>
+  {% endif %}
+  <p class="ajuda">LEA = limite de erro admissível: |Tol. +| quando o erro é positivo,
+     |Tol. −| quando é negativo. Ponto dentro quando |erro| ≤ LEA.</p>
+</section>
+{% endblock %}

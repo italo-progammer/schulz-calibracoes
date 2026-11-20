@@ -1,0 +1,134 @@
+AWSTemplateFormatVersion: "2010-09-09"
+Transform: AWS::Serverless-2016-10-31
+Description: >
+  Plataforma de calibracoes Schulz (Projeto Aplicado III - AV04).
+  Lambda + Function URL + DynamoDB. Pensado para ficar dentro do Free Tier.
+
+Parameters:
+  SenhaApp:
+    Type: String
+    NoEcho: true
+    MinLength: 12
+    Description: Senha de acesso da plataforma (minimo 12 caracteres).
+  ChaveSessao:
+    Type: String
+    NoEcho: true
+    MinLength: 32
+    Description: Chave aleatoria que assina o cookie de sessao (minimo 32 caracteres).
+  EmailAlerta:
+    Type: String
+    Default: ""
+    Description: E-mail para alertas de custo (AWS Budgets). Vazio = nao cria o orcamento.
+  LimiteOrcamentoUsd:
+    Type: Number
+    Default: 1
+    MinValue: 1
+    Description: Alerta quando o gasto previsto passar de X dolares.
+
+Conditions:
+  CriarOrcamento: !Not [!Equals [!Ref EmailAlerta, ""]]
+
+Resources:
+  Tabela:
+    Type: AWS::DynamoDB::Table
+    DeletionPolicy: Delete
+    Properties:
+      TableName: !Sub "${AWS::StackName}-calibracoes"
+      BillingMode: PROVISIONED          # 5/5 fica dentro dos 25/25 sempre gratuitos
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      AttributeDefinitions:
+        - AttributeName: pk
+          AttributeType: S
+        - AttributeName: sk
+          AttributeType: S
+      KeySchema:
+        - AttributeName: pk
+          KeyType: HASH
+        - AttributeName: sk
+          KeyType: RANGE
+
+  Funcao:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: !Sub "${AWS::StackName}-app"
+      CodeUri: build/package/
+      Handler: lambda_handler.handler
+      Runtime: python3.12
+      Architectures: [x86_64]
+      MemorySize: 512
+      Timeout: 30
+      Environment:
+        Variables:
+          APP_PASSWORD: !Ref SenhaApp
+          SECRET_KEY: !Ref ChaveSessao
+          STORAGE_BACKEND: dynamodb
+          TABLE_NAME: !Ref Tabela
+      Policies:
+        - Version: "2012-10-17"
+          Statement:
+            - Effect: Allow
+              Action: [dynamodb:PutItem, dynamodb:GetItem, dynamodb:Query]
+              Resource: !GetAtt Tabela.Arn
+      FunctionUrlConfig:
+        AuthType: NONE                  # o acesso e protegido pelo login da propria aplicacao
+
+  # Desde out/2025 uma URL publica exige InvokeFunctionUrl E InvokeFunction.
+  PermissaoUrl:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Funcao
+      Action: lambda:InvokeFunctionUrl
+      Principal: "*"
+      FunctionUrlAuthType: NONE
+
+  PermissaoInvocar:
+    Type: AWS::Lambda::Permission
+    Properties:
+      FunctionName: !Ref Funcao
+      Action: lambda:InvokeFunction
+      Principal: "*"
+      InvokedViaFunctionUrl: true
+
+  Logs:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub "/aws/lambda/${AWS::StackName}-app"
+      RetentionInDays: 7                # evita acumular logs indefinidamente
+
+  Orcamento:
+    Type: AWS::Budgets::Budget
+    Condition: CriarOrcamento
+    Properties:
+      Budget:
+        BudgetName: !Sub "${AWS::StackName}-limite"
+        BudgetType: COST
+        TimeUnit: MONTHLY
+        BudgetLimit:
+          Amount: !Ref LimiteOrcamentoUsd
+          Unit: USD
+      NotificationsWithSubscribers:
+        - Notification:
+            NotificationType: FORECASTED
+            ComparisonOperator: GREATER_THAN
+            Threshold: 80
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref EmailAlerta
+        - Notification:
+            NotificationType: ACTUAL
+            ComparisonOperator: GREATER_THAN
+            Threshold: 100
+            ThresholdType: PERCENTAGE
+          Subscribers:
+            - SubscriptionType: EMAIL
+              Address: !Ref EmailAlerta
+
+Outputs:
+  UrlDaPlataforma:
+    Description: Endereco publico da plataforma (HTTPS).
+    Value: !GetAtt FuncaoUrl.FunctionUrl
+  Tabela:
+    Value: !Ref Tabela

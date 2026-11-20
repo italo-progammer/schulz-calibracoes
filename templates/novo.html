@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% block titulo %}Nova análise{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao--estreito">
+  <h1>Nova análise</h1>
+  <p class="ajuda">Envie o arquivo Excel (.xlsx) com as leituras do instrumento e os
+    valores do padrão. O sistema calcula a média, o erro sistemático, valida cada
+    ponto contra o limite de erro admissível e emite o parecer final.</p>
+
+  {% if erro %}
+  <div class="alerta alerta--erro" role="alert"><strong>Não foi possível processar.</strong> {{ erro }}</div>
+  {% endif %}
+
+  <form action="{{ url_for('processar') }}" method="post" enctype="multipart/form-data">
+    <label for="planilha" class="rotulo">Planilha (.xlsx)</label>
+    <input id="planilha" name="planilha" type="file" accept=".xlsx" required>
+    <button type="submit" class="botao">Processar planilha</button>
+  </form>
+
+  <details class="detalhes">
+    <summary>Layout esperado da planilha</summary>
+    <p>Uma linha de cabeçalho com <code>Parâmetro avaliado</code>,
+       <code>Valor nominal</code>, <code>Tol. +</code>, <code>Tol. -</code> e uma ou
+       mais colunas <code>Medida 1</code>, <code>Medida 2</code>… O cabeçalho pode estar
+       em qualquer linha; textos acima e abaixo da tabela são ignorados.</p>
+  </details>
+</section>
+{% endblock %}

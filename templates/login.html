@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block titulo %}Entrar{% endblock %}
+{% block conteudo %}
+<section class="cartao cartao--estreito">
+  <h1>Entrar na plataforma</h1>
+  <p class="ajuda">Acesso restrito à equipe de metrologia. Informe a senha de acesso.</p>
+  {% if erro %}<div class="alerta alerta--erro" role="alert">{{ erro }}</div>{% endif %}
+  <form action="{{ url_for('login') }}" method="post">
+    <input type="hidden" name="next" value="{{ destino }}">
+    <label for="senha" class="rotulo">Senha</label>
+    <input id="senha" name="senha" type="password" autocomplete="current-password" required autofocus class="campo">
+    <button type="submit" class="botao">Entrar</button>
+  </form>
+</section>
+{% endblock %}
